@@ -674,3 +674,14 @@ button:active {
     color: #c62828;
     font-weight: bold;
 }
+
+/* Ocultar flechas de control numérico (Spinners) */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
+}

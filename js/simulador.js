@@ -14,20 +14,11 @@ let currentAnomDial = -1;
 
 let digiInterval;
 let digiTarget = "";
-let impCorrectCode = "";
 let audValues = [0, 0, 0, 0, 0];
 let audTarget = 0;
 
 let qTimerInterval;
 let qTimeLeft = 7;
-let justDidTransit = false;
-
-const transitEvents = [
-    { q: "Vas conduciendo el vehículo oficial y suena tu celular personal. ¿Qué haces?", opts: [{ text: "Contestar rápido.", isCorrect: false }, { text: "Estacionarme en lugar seguro para contestar.", isCorrect: true }], exp: "Prohibido usar celular conduciendo." },
-    { q: "Llegas a la colonia y te estacionas. ¿Cómo lo haces?", opts: [{ text: "De frente a la banqueta.", isCorrect: false }, { text: "De reversa, frente a la salida.", isCorrect: true }], exp: "Todo vehículo debe estacionarse con el frente a la salida." },
-    { q: "Notas botellas sueltas en el piso de la cabina.", opts: [{ text: "Las dejo ahí.", isCorrect: false }, { text: "Las recojo.", isCorrect: true }], exp: "Cabina libre de objetos que obstruyan pedales." },
-    { q: "Terminaste la ruta y te subes al vehículo.", opts: [{ text: "Arranco rápido por la presión del tiempo.", isCorrect: false }, { text: "Me coloco el cinturón de seguridad antes de arrancar.", isCorrect: true }], exp: "Obligatorio usar cinturón de seguridad antes de iniciar el movimiento." }
-];
 
 // CHECKLIST
 function checkChecklist() {
@@ -88,27 +79,6 @@ function handleTimeout() {
     showFeedback(false, "¡TIEMPO AGOTADO!", "En campo debes ser más rápido.");
 }
 
-function triggerTransitEvent() {
-    const overlay = document.getElementById('transitOverlay');
-    const sit = document.getElementById('transitSituation');
-    const opts = document.getElementById('transitOptions');
-    let ev = transitEvents[Math.floor(Math.random() * transitEvents.length)];
-
-    sit.innerText = ev.q; opts.innerHTML = '';
-    ev.opts.forEach(o => {
-        let btn = document.createElement('button'); btn.className = 'btn-outline'; btn.innerText = o.text;
-        btn.onclick = () => evalTransit(o.isCorrect, ev.exp);
-        opts.appendChild(btn);
-    });
-    overlay.style.display = 'flex';
-}
-
-function evalTransit(isCorrect, exp) {
-    document.getElementById('transitOverlay').style.display = 'none';
-    if (isCorrect) showFeedback(true, "BUENA DECISIÓN", "Conducción segura. Avanzando...");
-    else showFeedback(false, "VIOLACIÓN DE SEGURIDAD", "Has cometido una falta grave.", exp);
-}
-
 function generateQuestion() {
     clearInterval(digiInterval);
     if (isPracticeMode) { document.getElementById('qCountText').innerText = stats.current + 1; }
@@ -118,7 +88,7 @@ function generateQuestion() {
     }
 
     if (selectedModule === 'random') {
-        const mods = ['classic', 'auditor', 'digital', 'impediment', 'theory'];
+        const mods = ['classic', 'auditor', 'digital', 'theory'];
         currentActiveModule = mods[Math.floor(Math.random() * mods.length)];
     } else { currentActiveModule = selectedModule; }
 
@@ -128,7 +98,6 @@ function generateQuestion() {
     if (currentActiveModule === 'classic') setupClassic();
     else if (currentActiveModule === 'auditor') setupAuditor();
     else if (currentActiveModule === 'digital') setupDigital();
-    else if (currentActiveModule === 'impediment') setupImpediment();
     else if (currentActiveModule === 'theory') setupTheory();
 
     startQuestionTimer();
@@ -137,7 +106,6 @@ function generateQuestion() {
 function hideAllModules() {
     document.getElementById('mod-electromecanico').classList.add('hidden');
     document.getElementById('mod-digital').classList.add('hidden');
-    document.getElementById('mod-impedimento').classList.add('hidden');
     document.getElementById('mod-theory').classList.add('hidden');
     document.getElementById('generalControls').classList.add('hidden');
     document.getElementById('auditorControls').classList.add('hidden');
@@ -220,20 +188,6 @@ function setupDigital() {
     digiInterval = setInterval(() => { step++; document.getElementById('digital-text').innerText = finalPhases[step % finalPhases.length]; }, 1800);
 }
 
-/* ================= MÓDULO 4: IMPEDIMENTOS ================= */
-function setupImpediment() {
-    document.getElementById('mod-impedimento').classList.remove('hidden');
-    const sc = [
-        { t: "El medidor está dentro de una reja y hay un perro pastor alemán suelto ladrando.", c: "perro" },
-        { t: "Llegas al domicilio y el portón está cerrado con candado. Nadie atiende.", c: "cerrado" },
-        { t: "El cristal del medidor está completamente blanco y quemado por el sol.", c: "opaco" },
-        { t: "En la base del medidor solo cuelgan los cables, el equipo no está.", c: "retirado" }
-    ];
-    let r = sc[Math.floor(Math.random() * sc.length)];
-    document.getElementById('impText').innerText = `"${r.t}"`;
-    impCorrectCode = r.c;
-}
-
 /* ================= MÓDULO 5: TEORÍA (CAP 100) ================= */
 function setupTheory() {
     document.getElementById('mod-theory').classList.remove('hidden');
@@ -298,10 +252,13 @@ function checkAnswer() {
         if (input.value === "") return;
         input.disabled = true;
         let realStr = currentReading.toString().padStart(currentNumDials, '0');
-        if (isAnomalyCurrent) return showFeedback(false, "OMITISTE UNA ANOMALÍA", ``, `La lectura era <b>${realStr}</b>, pero el Reloj estaba físicamente alterado. ¡Debiste reportarlo!`);
+        if (isAnomalyCurrent) {
+            let mult = Math.pow(10, currentAnomDial);
+            return showFeedback(false, "OMITISTE UNA ANOMALÍA", ``, `La lectura era <b>${realStr}</b>, pero el <b>Reloj de x${mult}</b> estaba físicamente alterado.<br><br><b>¿Por qué?</b> La aguja apuntaba a una posición incorrecta que no tiene lógica ni congruencia con lo que marca el reloj de su derecha (está chueca o "desfasada"). ¡Debiste reportarlo!`);
+        }
         let isCorrect = (parseInt(input.value) === currentReading);
         if (isCorrect) stats.correct++;
-        showFeedback(isCorrect, isCorrect ? "¡CORRECTO!" : "ERROR DE LECTURA", isCorrect ? "Excelente lectura." : `Ingresaste: <b>${input.value}</b><br>Correcta: <b>${realStr}</b>`, isCorrect ? "" : "Recuerda tomar siempre el número menor y confirmar con el reloj de la derecha.");
+        showFeedback(isCorrect, isCorrect ? "¡CORRECTO!" : "ERROR DE LECTURA", isCorrect ? "Excelente lectura." : `Ingresaste: <b>${input.value}</b><br>Correcta: <b>${realStr}</b>`, isCorrect ? "" : "Recuerda tomar siempre el número menor y confirmar congruencia con el reloj de la derecha.");
     }
     else if (currentActiveModule === 'auditor') {
         let userVal = parseInt(audValues.join('')); let isCorrect = (userVal === audTarget);
@@ -319,22 +276,20 @@ function checkAnswer() {
 function reportAnomaly() {
     clearInterval(qTimerInterval); document.getElementById('userReading').disabled = true;
     if (isAnomalyCurrent) {
-        stats.correct++; showFeedback(true, "¡ANOMALÍA DETECTADA!", "Excelente observación.", `La lectura indicaba <b>${currentReading.toString().padStart(currentNumDials, '0')}</b>, pero notaste el desfase a tiempo.`);
-    } else { showFeedback(false, "FALSA ALARMA", "El medidor estaba perfecto."); }
+        let mult = Math.pow(10, currentAnomDial);
+        stats.correct++; showFeedback(true, "¡ANOMALÍA DETECTADA!", "Excelente observación.", `La lectura debía ser <b>${currentReading.toString().padStart(currentNumDials, '0')}</b>, pero el <b>Reloj de x${mult}</b> estaba desfasado (fuera de sincronía con su vecino de la derecha).`);
+    } else {
+        showFeedback(false, "FALSA ALARMA", "El medidor estaba perfecto.", "Todas las agujas están sincronizadas correctamente con el reloj de su derecha. Debiste introducir la lectura normalmente.");
+    }
 }
 
-function checkImpediment(code) {
-    clearInterval(qTimerInterval); let isCorrect = (code === impCorrectCode);
-    if (isCorrect) stats.correct++;
-    showFeedback(isCorrect, isCorrect ? "¡CORRECTO!" : "ERROR DE CLAVE", isCorrect ? "Clave aplicada." : "Usaste una clave incorrecta.");
-}
+
 
 /* FEEDBACK INLINE */
 function showFeedback(isCorrect, titleText, msg, explanationHTML = "") {
     clearInterval(digiInterval); clearInterval(qTimerInterval);
     document.getElementById('generalControls').classList.add('hidden');
     document.getElementById('auditorControls').classList.add('hidden');
-    document.getElementById('mod-impedimento').classList.add('hidden');
     document.getElementById('mod-theory').classList.add('hidden');
 
     const feedCard = document.getElementById('inlineFeedback');
@@ -354,10 +309,8 @@ function showFeedback(isCorrect, titleText, msg, explanationHTML = "") {
 
 function nextQuestion() {
     document.getElementById('inlineFeedback').classList.add('hidden');
-    if (!justDidTransit && Math.random() < 0.35 && stats.current > 0) {
-        justDidTransit = true; triggerTransitEvent(); return;
-    }
-    justDidTransit = false; stats.current++; generateQuestion();
+    stats.current++;
+    generateQuestion();
 }
 
 function finishTest() {
@@ -366,28 +319,10 @@ function finishTest() {
     document.getElementById('resultScreen').classList.remove('hidden');
     let pct = stats.current > 0 ? Math.round((stats.correct / stats.current) * 100) : 0;
     document.getElementById('finalScore').innerText = pct + "%";
-    enviarResultadosAn8n(pct, stats.correct, stats.current);
-    document.getElementById('finalScore').style.color = (pct >= 80) ? "#2e7d32" : "#c62828";
-    document.getElementById('resName').innerText = userData.name;
-    document.getElementById('resRPE').innerText = userData.rpe;
-    document.getElementById('resTotal').innerText = stats.current;
     document.getElementById('resCorrect').innerText = stats.correct;
     document.getElementById('resMod').innerText = isPracticeMode ? "Práctica" : "Evaluación";
 }
 /* ================= MÓDULO RIM ================= */
-function openRimTraining() {
-    document.getElementById('loginScreen').classList.add('hidden');
-    document.getElementById('rimTrainingScreen').classList.remove('hidden');
-    // Reset selects y resultado
-    document.getElementById('rimProb').value = "";
-    document.getElementById('rimCons').value = "";
-    document.getElementById('rimResultBox').style.display = 'none';
-}
-
-function closeRimTraining() {
-    document.getElementById('rimTrainingScreen').classList.add('hidden');
-    document.getElementById('loginScreen').classList.remove('hidden');
-}
 
 function calculateRimRisk() {
     const prob = document.getElementById('rimProb').value;
@@ -491,12 +426,31 @@ let currentTutIndex = 0;
 function startRimTutorial() {
     document.getElementById('loginScreen').classList.add('hidden');
     document.getElementById('rimTutorialScreen').classList.remove('hidden');
-    loadRimTutorialCase();
+    showRimSchoolBlock();
 }
 
 function closeRimTutorial() {
     document.getElementById('rimTutorialScreen').classList.add('hidden');
     document.getElementById('loginScreen').classList.remove('hidden');
+}
+
+function showRimCalcBlock() {
+    document.getElementById('rimSchoolBlock').classList.add('hidden');
+    document.getElementById('rimCalcBlock').classList.remove('hidden');
+    document.getElementById('btnRimCalc').style.background = '#e1f5fe';
+    document.getElementById('btnRimCalc').style.color = '#0288d1';
+    document.getElementById('btnRimTut').style.background = 'white';
+    document.getElementById('btnRimTut').style.color = '#666';
+}
+
+function showRimSchoolBlock() {
+    document.getElementById('rimCalcBlock').classList.add('hidden');
+    document.getElementById('rimSchoolBlock').classList.remove('hidden');
+    document.getElementById('btnRimTut').style.background = '#e1f5fe';
+    document.getElementById('btnRimTut').style.color = '#0288d1';
+    document.getElementById('btnRimCalc').style.background = 'white';
+    document.getElementById('btnRimCalc').style.color = '#666';
+    loadRimTutorialCase();
 }
 
 function loadRimTutorialCase() {

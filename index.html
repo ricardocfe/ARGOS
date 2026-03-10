@@ -32,7 +32,6 @@
                     <option value="classic">Lectura Clásica (Electromecánicos)</option>
                     <option value="auditor">Modo Auditor (Acomodar Agujas)</option>
                     <option value="digital">Digitales Inteligentes (LCD)</option>
-                    <option value="impediment">Claves de Observación (Impedimentos)</option>
                     <option value="theory" style="font-weight:bold;">📚 Examen Teórico (Capítulo 100)</option>
                     <option value="random">🔥 Aleatorio Extremo (Todos)</option>
                 </select>
@@ -50,99 +49,108 @@
             <button class="btn-green" style="margin-top: 10px;" onclick="startTest(false)">📝 EVALUACIÓN OFICIAL (10
                 PREGUNTAS)</button>
             <button class="btn-outline" style="margin-top: 15px; border-color: #f57c00; color: #f57c00;"
-                onclick="openRimTraining()">📋 ABRIR CAPACITACIÓN FORMATO RIM</button>
-            <button class="btn-outline" style="margin-top: 15px; border-color: #f57c00; color: #f57c00;"
-                onclick="startRimTutorial()">📋 ESCUELA RIM: APRENDE A LLENAR EL FORMATO</button>
+                onclick="startRimTutorial()">📋 CENTRO DE ENTRENAMIENTO RIM</button>
         </div>
     </div>
-
-    <div id="rimTrainingScreen" class="screen hidden">
-        <div class="login-card" style="width: 95%; max-width: 500px; text-align: center;">
-            <h3 style="color:#f57c00; margin-top: 0;">Academia RIM: Matriz de Riesgos</h3>
-
-            <div
-                style="background: #f9f9f9; padding: 10px; border-radius: 8px; margin-bottom: 15px; text-align: left; font-size: 12px; color: #555;">
-                <b>Teoría Rápida (Niveles de Riesgo):</b>
-                <ul style="margin: 5px 0; padding-left: 20px;">
-                    <li><b style="color:#9e9e9e">Trivial:</b> No requiere acción específica.</li>
-                    <li><b style="color:#4caf50">Tolerable:</b> No se necesita mejorar la acción.</li>
-                    <li><b style="color:#ffeb3b">Moderado:</b> Se deben hacer esfuerzos para reducir el riesgo.</li>
-                    <li><b style="color:#ff9800">Importante:</b> No comenzar el trabajo hasta reducir el riesgo.</li>
-                    <li><b style="color:#f44336">Intolerable:</b> Prohibido iniciar el trabajo.</li>
-                </ul>
-            </div>
-
-            <div style="text-align: left; margin-bottom: 10px;">
-                <label class="login-label">PROBABILIDAD</label>
-                <select id="rimProb" class="login-select" onchange="calculateRimRisk()">
-                    <option value="" disabled selected>Seleccione...</option>
-                    <option value="Baja">Baja</option>
-                    <option value="Media">Media</option>
-                    <option value="Alta">Alta</option>
-                </select>
-
-                <label class="login-label">CONSECUENCIA</label>
-                <select id="rimCons" class="login-select" onchange="calculateRimRisk()">
-                    <option value="" disabled selected>Seleccione...</option>
-                    <option value="Ligeramente Dañino">Ligeramente Dañino</option>
-                    <option value="Dañino">Dañino</option>
-                    <option value="Extremadamente Dañino">Extremadamente Dañino</option>
-                </select>
-            </div>
-
-            <div id="rimResultBox" class="rim-result-box" style="margin-bottom: 15px; display: none;">
-                <div
-                    style="font-size: 12px; text-transform: uppercase; color: #fff; margin-bottom: 5px; font-weight: bold;">
-                    Nivel de Riesgo Calculado</div>
-                <div id="rimRiskLevel" style="font-size: 24px; font-weight: bold; color: #fff;">-</div>
-                <div id="rimRiskAction" style="font-size: 13px; color: #fff; margin-top: 5px;">-</div>
-            </div>
-
-            <button class="btn-outline" style="border-color: #666; color: #666;" onclick="closeRimTraining()">⬅ Regresar
-                al Menú Principal</button>
-        </div>
-    </div>
-
     <div id="rimTutorialScreen" class="screen hidden">
         <div class="login-card" style="max-width: 450px; text-align: left;">
-            <h3 style="color:#f57c00; margin-top:0; text-align:center;">📝 TALLER PRÁCTICO RIM</h3>
-            <p style="font-size:12px; color:#666; text-align:center; margin-bottom: 15px;">Aprende a llenar el formato
-                evaluando un caso real.</p>
 
-            <div
-                style="background:#fff3e0; padding:15px; border-radius:8px; border-left:4px solid #ff9800; margin-bottom:15px;">
-                <strong style="color:#e65100; font-size:13px;">ESCENARIO EN CAMPO:</strong>
-                <div id="rimTutScenario" style="font-size:14px; margin-top:5px; color:#333;">Cargando escenario...</div>
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <button id="btnRimCalc" class="btn-outline"
+                    style="flex: 1; padding: 10px; font-size: 11px; font-weight: bold; background: #e1f5fe; border-color: #0288d1; color: #0288d1;"
+                    onclick="showRimCalcBlock()">CALCULADORA MANUAL</button>
+                <button id="btnRimTut" class="btn-outline"
+                    style="flex: 1; padding: 10px; font-size: 11px; font-weight: bold; background: white; border-color: #ccc; color: #666;"
+                    onclick="showRimSchoolBlock()">TALLER DE CASOS</button>
             </div>
 
-            <div id="rimTutStep1" class="rim-step">
-                <label class="login-label">PASO 1: Identificación del Peligro (Las 6 A's)</label>
-                <div id="rimTutOpts1" style="display:flex; flex-direction:column; gap:8px;"></div>
+            <!-- BLOQUE CALCULADORA RIM -->
+            <div id="rimCalcBlock">
+                <h3 style="color:#f57c00; margin-top: 0; text-align: center;">Calculadora de Riesgos RIM</h3>
+
+                <div
+                    style="background: #f9f9f9; padding: 10px; border-radius: 8px; margin-bottom: 15px; text-align: left; font-size: 12px; color: #555;">
+                    <b>Teoría Rápida (Niveles de Riesgo):</b>
+                    <ul style="margin: 5px 0; padding-left: 20px;">
+                        <li><b style="color:#9e9e9e">Trivial:</b> No requiere acción específica.</li>
+                        <li><b style="color:#4caf50">Tolerable:</b> No se necesita mejorar la acción.</li>
+                        <li><b style="color:#ffeb3b">Moderado:</b> Se deben hacer esfuerzos para reducir el riesgo.</li>
+                        <li><b style="color:#ff9800">Importante:</b> No comenzar el trabajo hasta reducir el riesgo.
+                        </li>
+                        <li><b style="color:#f44336">Intolerable:</b> Prohibido iniciar el trabajo.</li>
+                    </ul>
+                </div>
+
+                <div style="text-align: left; margin-bottom: 10px;">
+                    <label class="login-label">PROBABILIDAD</label>
+                    <select id="rimProb" class="login-select" onchange="calculateRimRisk()">
+                        <option value="" disabled selected>Seleccione...</option>
+                        <option value="Baja">Baja</option>
+                        <option value="Media">Media</option>
+                        <option value="Alta">Alta</option>
+                    </select>
+
+                    <label class="login-label">CONSECUENCIA</label>
+                    <select id="rimCons" class="login-select" onchange="calculateRimRisk()">
+                        <option value="" disabled selected>Seleccione...</option>
+                        <option value="Ligeramente Dañino">Ligeramente Dañino</option>
+                        <option value="Dañino">Dañino</option>
+                        <option value="Extremadamente Dañino">Extremadamente Dañino</option>
+                    </select>
+                </div>
+
+                <div id="rimResultBox" class="rim-result-box" style="margin-bottom: 15px; display: none;">
+                    <div
+                        style="font-size: 12px; text-transform: uppercase; color: #fff; margin-bottom: 5px; font-weight: bold;">
+                        Nivel de Riesgo Calculado</div>
+                    <div id="rimRiskLevel" style="font-size: 24px; font-weight: bold; color: #fff;">-</div>
+                    <div id="rimRiskAction" style="font-size: 13px; color: #fff; margin-top: 5px;">-</div>
+                </div>
             </div>
 
-            <div id="rimTutStep2" class="rim-step hidden" style="margin-top:15px;">
-                <label class="login-label">PASO 2: Medida de Control a aplicar</label>
-                <div id="rimTutOpts2" style="display:flex; flex-direction:column; gap:8px;"></div>
-            </div>
+            <!-- BLOQUE ESCUELA RIM -->
+            <div id="rimSchoolBlock" class="hidden">
+                <h3 style="color:#f57c00; margin-top:0; text-align:center;">📝 TALLER PRÁCTICO RIM</h3>
+                <p style="font-size:12px; color:#666; text-align:center; margin-bottom: 15px;">Aprende a llenar el
+                    formato evaluando un caso real.</p>
 
-            <div id="rimTutStep3" class="rim-step hidden" style="margin-top:15px;">
-                <label class="login-label">PASO 3: Valoración del Riesgo Residual</label>
-                <p style="font-size:11px; color:#555; margin-top:0;">Con el control aplicado, ¿cómo calificas el riesgo?
-                </p>
-                <div id="rimTutOpts3" style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;"></div>
-            </div>
+                <div
+                    style="background:#fff3e0; padding:15px; border-radius:8px; border-left:4px solid #ff9800; margin-bottom:15px;">
+                    <strong style="color:#e65100; font-size:13px;">ESCENARIO EN CAMPO:</strong>
+                    <div id="rimTutScenario" style="font-size:14px; margin-top:5px; color:#333;">Cargando escenario...
+                    </div>
+                </div>
 
-            <div id="rimTutStep4" class="rim-step hidden" style="margin-top:15px;">
-                <label class="login-label">PASO 4: Decisión Final de la RIM</label>
-                <div id="rimTutOpts4" style="display:flex; flex-direction:column; gap:8px;"></div>
-            </div>
+                <div id="rimTutStep1" class="rim-step">
+                    <label class="login-label">PASO 1: Identificación del Peligro (Las 6 A's)</label>
+                    <div id="rimTutOpts1" style="display:flex; flex-direction:column; gap:8px;"></div>
+                </div>
 
-            <div id="rimTutFeedback" class="hidden"
-                style="margin-top:15px; padding:10px; border-radius:8px; font-size:13px; font-weight:bold; text-align:center;">
+                <div id="rimTutStep2" class="rim-step hidden" style="margin-top:15px;">
+                    <label class="login-label">PASO 2: Medida de Control a aplicar</label>
+                    <div id="rimTutOpts2" style="display:flex; flex-direction:column; gap:8px;"></div>
+                </div>
+
+                <div id="rimTutStep3" class="rim-step hidden" style="margin-top:15px;">
+                    <label class="login-label">PASO 3: Valoración del Riesgo Residual</label>
+                    <p style="font-size:11px; color:#555; margin-top:0;">Con el control aplicado, ¿cómo calificas el
+                        riesgo?
+                    </p>
+                    <div id="rimTutOpts3" style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;"></div>
+                </div>
+
+                <div id="rimTutStep4" class="rim-step hidden" style="margin-top:15px;">
+                    <label class="login-label">PASO 4: Decisión Final de la RIM</label>
+                    <div id="rimTutOpts4" style="display:flex; flex-direction:column; gap:8px;"></div>
+                </div>
+
+                <div id="rimTutFeedback" class="hidden"
+                    style="margin-top:15px; padding:10px; border-radius:8px; font-size:13px; font-weight:bold; text-align:center;">
+                </div>
             </div>
 
             <button class="btn-outline" style="margin-top: 20px; width: 100%; border-color:#d32f2f; color:#d32f2f;"
-                onclick="closeRimTutorial()">SALIR DE LA ESCUELA RIM</button>
+                onclick="closeRimTutorial()">SALIR AL MENÚ PRINCIPAL</button>
         </div>
     </div>
 
@@ -191,17 +199,7 @@
             </div>
         </div>
 
-        <div id="mod-impedimento" class="module-container hidden">
-            <div class="imp-box">
-                <div id="impText" class="imp-text">"Texto del escenario..."</div>
-                <div class="imp-grid">
-                    <button class="btn-imp" onclick="checkImpediment('perro')">🐕<br>Perro Bravo</button>
-                    <button class="btn-imp" onclick="checkImpediment('cerrado')">🔒<br>Casa Cerrada</button>
-                    <button class="btn-imp" onclick="checkImpediment('opaco')">🌫️<br>Ilegible / Opaco</button>
-                    <button class="btn-imp" onclick="checkImpediment('retirado')">❌<br>Medidor Retirado</button>
-                </div>
-            </div>
-        </div>
+
 
         <div id="mod-theory" class="module-container hidden">
             <div class="imp-box" style="background:#e3f2fd; border:2px solid #0288d1;">
@@ -214,8 +212,9 @@
         </div>
 
         <div class="controls" id="generalControls">
-            <input type="text" inputmode="numeric" pattern="\d*" id="userReading" class="main-input" placeholder="00000"
-                maxlength="5" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+            <input type="number" id="userReading" class="main-input" placeholder="00000"
+                oninput="if(this.value.length > 5) this.value = this.value.slice(0, 5);"
+                onkeydown="if(event.key === 'e' || event.key === 'E' || event.key === '+' || event.key === '-' || event.key === '.') { event.preventDefault(); }">
             <button id="btnAction" class="btn-green" onclick="checkAnswer()">CONFIRMAR LECTURA</button>
             <button id="btnAnomaly" class="btn-red" onclick="reportAnomaly()">🚩 REPORTAR ANOMALÍA</button>
         </div>
@@ -231,15 +230,7 @@
         </div>
     </div>
 
-    <div id="transitOverlay" class="transit-overlay">
-        <div class="transit-card">
-            <div style="font-size: 40px; margin-bottom: 5px;">🚐</div>
-            <div class="text-feed transit-feed">EVENTO EN RUTA</div>
-            <div id="transitSituation"
-                style="font-size:14px; color:#333; margin: 15px 0; font-weight:bold; text-align:justify;"></div>
-            <div id="transitOptions" style="display:flex; flex-direction:column; width:100%; gap:5px;"></div>
-        </div>
-    </div>
+
 
     <div id="resultScreen" class="screen hidden">
         <div class="result-card">
