@@ -20,6 +20,16 @@ let audTarget = 0;
 let qTimerInterval;
 let qTimeLeft = 7;
 
+let currentTheoryPool = [];
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
 // CHECKLIST
 function checkChecklist() {
     let allChecked = true;
@@ -46,10 +56,33 @@ function startTest(practice) {
     document.getElementById('checklistScreen').classList.remove('hidden');
 }
 
+function startTheoryTest() {
+    userData.name = document.getElementById('inputName').value.trim();
+    userData.rpe = document.getElementById('inputRPE').value.trim();
+
+    if (!userData.name || !userData.rpe) return alert("⚠️ Completa Nombre y RPE.");
+
+    isPracticeMode = false;
+    selectedModule = 'theory';
+    isFieldMode = false;
+    isRutaMode = false;
+
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('gameScreen').classList.remove('hidden');
+
+    stats.current = 0;
+    stats.correct = 0;
+    stats.total = 10;
+
+    currentTheoryPool = shuffleArray([...theoryBank]);
+    generateQuestion();
+}
+
 function startRoute() {
     document.getElementById('checklistScreen').classList.add('hidden');
     document.getElementById('gameScreen').classList.remove('hidden');
     stats.current = 0; stats.correct = 0;
+    currentTheoryPool = shuffleArray([...theoryBank]);
     generateQuestion();
 }
 
@@ -88,7 +121,7 @@ function generateQuestion() {
     }
 
     if (selectedModule === 'random') {
-        const mods = ['classic', 'auditor', 'digital', 'theory'];
+        const mods = ['classic', 'auditor', 'digital'];
         currentActiveModule = mods[Math.floor(Math.random() * mods.length)];
     } else { currentActiveModule = selectedModule; }
 
@@ -191,13 +224,17 @@ function setupDigital() {
 /* ================= MÓDULO 5: TEORÍA (CAP 100) ================= */
 function setupTheory() {
     document.getElementById('mod-theory').classList.remove('hidden');
-    let item = theoryBank[Math.floor(Math.random() * theoryBank.length)];
+
+    if (currentTheoryPool.length === 0) {
+        currentTheoryPool = shuffleArray([...theoryBank]);
+    }
+    let item = currentTheoryPool.pop();
 
     document.getElementById('theoryQuestionText').innerText = item.q;
     let optsCont = document.getElementById('theoryOptionsContainer');
     optsCont.innerHTML = '';
 
-    let shuffledOpts = [...item.opts].sort(() => Math.random() - 0.5);
+    let shuffledOpts = shuffleArray([...item.opts]);
 
     shuffledOpts.forEach(o => {
         let btn = document.createElement('button');
